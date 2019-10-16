@@ -1,0 +1,16 @@
+server:
+  port: ${port:8080}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ["prometheus", "metrics"]
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  endpoint:
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
