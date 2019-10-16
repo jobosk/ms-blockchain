@@ -28,16 +28,15 @@ public class PatientServiceImpl implements PatientService {
   private static final String blockchainNetwork = "rinkeby.infura.io";
   private static final String blockchainProject = "d434e755cd164e8f8c4fca9545e63178";
 
+  // Ubicacion de la wallet fisica
   private static final String walletFilePath =
       "./src/main/resources/UTC--2019-02-01T17-01-57.104Z--ab67dc2a9e0467131ae92562f0fd21e7c85dac05";
-  // Ubicacion de la wallet fisica
-  private static final String walletPassword = "prueba123"; // Contraseña de la wallet fisica
-  private static final String walletAddress = "0xab67dc2a9e0467131ae92562f0fd21e7c85dac05";
-  // Direccion de la wallet fisica
 
-  // Direccion del contrato en Rinkeby
-  private String contractAddress = "0x9a319639560c7d5bb7caf4cc671d558bd14bf612";
-  // Nota: Para no desplegar cada vez, le pego la ultima direccion usada
+  // Contraseña de la wallet fisica
+  private static final String walletPassword = "prueba123";
+
+  // Direccion de la wallet fisica
+  private static final String walletAddress = "0xab67dc2a9e0467131ae92562f0fd21e7c85dac05";
 
   /**
    * Recupera la URL al nodo de la blockchain, mediante el
