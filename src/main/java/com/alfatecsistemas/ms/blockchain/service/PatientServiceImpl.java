@@ -90,7 +90,7 @@ public class PatientServiceImpl implements PatientService {
     String balance;
     try {
       final EthGetBalance ethGetBalance =
-          getWeb3jHttp().ethGetBalance(walletAddress, DefaultBlockParameterName.LATEST).sendAsync().get();
+          getWeb3j(false).ethGetBalance(walletAddress, DefaultBlockParameterName.LATEST).sendAsync().get();
       balance = Convert.fromWei(ethGetBalance.getBalance().toString(), Convert.Unit.ETHER).toString();
     } catch (final Exception e) {
       log.error("", e);
@@ -102,7 +102,7 @@ public class PatientServiceImpl implements PatientService {
   private Patient getPatient(final String contractAddress) {
     Patient contract;
     try {
-      final Web3j web3j = getWeb3jHttp();
+      final Web3j web3j = getWeb3j(false);
       final Credentials credentials = WalletUtils.loadCredentials(walletPassword, walletFilePath);
       if (contractAddress != null) {
         contract = Patient.load(contractAddress, web3j, credentials, new DefaultGasProvider());
@@ -123,7 +123,7 @@ public class PatientServiceImpl implements PatientService {
     return patient != null ? patient.getContractAddress() : null;
   }
 
-  private BigInteger getValue(final RemoteCall<BigInteger> remoteCall) {
+  private static BigInteger getValue(final RemoteCall<BigInteger> remoteCall) {
     BigInteger value;
     try {
       value = remoteCall.send();
