@@ -71,13 +71,6 @@
         <plugin>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-maven-plugin</artifactId>
-          <!--
-          <configuration>
-            <jvmArguments>
-              -javaagent:./jmx_prometheus_javaagent-0.12.0.jar=8081:./config.yaml
-            </jvmArguments>
-          </configuration>
-          -->
         </plugin>
         <plugin>
           <groupId>org.web3j</groupId>
@@ -95,15 +88,10 @@
             <contract>
               <includes>
                 <include>Patient</include>
-                <!--
-                <include>Gambit</include>
-                <include>GambitMatch</include>
-                -->
               </includes>
               <!--
               <excludes>
                   <exclude>Greeter</exclude>
-                  <exclude>Mortal</exclude>
               </excludes>
               -->
             </contract>
