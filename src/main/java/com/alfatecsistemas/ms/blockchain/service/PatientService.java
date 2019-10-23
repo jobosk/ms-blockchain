@@ -6,6 +6,10 @@ public interface PatientService {
 
   String getCurrentBalance();
 
+  byte[] getPrivateKey();
+
+  byte[] getPublicKey();
+
   String createPatient();
 
   BigInteger getPatientInfo(String patientAddress);
