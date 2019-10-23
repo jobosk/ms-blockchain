@@ -13,7 +13,14 @@ import com.alfatecsistemas.ms.blockchain.feign.SignerFeign;
 import com.alfatecsistemas.ms.blockchain.service.PatientService;
 
 import java.math.BigInteger;
+import java.security.Key;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.spec.EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+
+import javax.crypto.Cipher;
 
 @RestController
 @RequestMapping("/blockchain")
@@ -38,10 +45,34 @@ public class PatientController {
   @GetMapping(value = "/signature/test/{message}")
   public boolean testSignature(final @PathVariable("message") String message) {
     final byte[] document = Base64.getDecoder().decode(message);
-    final SignDocumentDto signDocumentDto = new SignDocumentDto(document, patientService.getPrivateKey());
-    final byte[] signedDocument = signerClient.signDocument(signDocumentDto);
-    final ValidateSignatureDto validateSignatureDto =
-        new ValidateSignatureDto(signedDocument, patientService.getPublicKey());
-    return signerClient.validateDocumentSignature(validateSignatureDto);
+    final PublicKey signerPublicKey = buildPublicKey(signerClient.getPublicKey(), "RSA");
+    final byte[] encryptedPrivateKey = encrypt(patientService.getPrivateKey(), signerPublicKey, "RSA/ECB/PKCS1Padding");
+    final byte[] signedDocument = signerClient.signDocument(new SignDocumentDto(document, encryptedPrivateKey));
+    final byte[] publicKey = patientService.getPublicKey();
+    return signerClient.validateDocumentSignature(new ValidateSignatureDto(signedDocument, publicKey));
+  }
+
+  private static PublicKey buildPublicKey(final byte[] key, final String algorithm) {
+    PublicKey result;
+    try {
+      final EncodedKeySpec encodedKeySpec = new X509EncodedKeySpec(key);
+      final KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
+      result = keyFactory.generatePublic(encodedKeySpec);
+    } catch (final Exception e) {
+      result = null;
+    }
+    return result;
+  }
+
+  private static byte[] encrypt(final byte[] data, final Key key, final String algorithm) {
+    byte[] result;
+    try {
+      final Cipher cipher = Cipher.getInstance(algorithm);
+      cipher.init(Cipher.ENCRYPT_MODE, key);
+      result = cipher.doFinal(data);
+    } catch (final Exception e) {
+      result = new byte[0];
+    }
+    return result;
   }
 }
