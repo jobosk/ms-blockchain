@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alfatecsistemas.ms.blockchain.dto.EncryptionDto;
 import com.alfatecsistemas.ms.blockchain.dto.SignDocumentDto;
 import com.alfatecsistemas.ms.blockchain.dto.ValidateSignatureDto;
 import com.alfatecsistemas.ms.blockchain.feign.SignerFeign;
@@ -45,11 +46,11 @@ public class PatientController {
   @GetMapping(value = "/signature/test/{message}")
   public boolean testSignature(final @PathVariable("message") String message) {
     final byte[] document = Base64.getDecoder().decode(message);
-    final PublicKey signerPublicKey = buildPublicKey(signerClient.getPublicKey(), "RSA");
-    final byte[] encryptedPrivateKey = encrypt(patientService.getPrivateKey(), signerPublicKey, "RSA/ECB/PKCS1Padding");
+    final EncryptionDto encryptionDto = signerClient.getEncryptionSpecs();
+    final PublicKey signerPublicKey = buildPublicKey(encryptionDto.getPublicKey(), encryptionDto.getPublicKeyAlgorithm());
+    final byte[] encryptedPrivateKey = encrypt(patientService.getPrivateKey(), signerPublicKey, encryptionDto.getEncryptionAlgorithm());
     final byte[] signedDocument = signerClient.signDocument(new SignDocumentDto(document, encryptedPrivateKey));
-    final byte[] publicKey = patientService.getPublicKey();
-    return signerClient.validateDocumentSignature(new ValidateSignatureDto(signedDocument, publicKey));
+    return signerClient.validateDocumentSignature(new ValidateSignatureDto(signedDocument, patientService.getPublicKey()));
   }
 
   private static PublicKey buildPublicKey(final byte[] key, final String algorithm) {

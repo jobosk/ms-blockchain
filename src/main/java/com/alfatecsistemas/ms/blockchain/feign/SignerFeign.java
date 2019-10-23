@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.alfatecsistemas.ms.blockchain.dto.EncryptionDto;
 import com.alfatecsistemas.ms.blockchain.dto.SignDocumentDto;
 import com.alfatecsistemas.ms.blockchain.dto.ValidateSignatureDto;
 
@@ -13,8 +14,8 @@ import com.alfatecsistemas.ms.blockchain.dto.ValidateSignatureDto;
 @EnableAutoConfiguration
 public interface SignerFeign {
 
-  @GetMapping(value = "/signer/key")
-  byte[] getPublicKey();
+  @GetMapping(value = "/signer/specs")
+  EncryptionDto getEncryptionSpecs();
 
   @PutMapping(value = "/signer/sign")
   byte[] signDocument(final @RequestBody SignDocumentDto signDocumentDto);
