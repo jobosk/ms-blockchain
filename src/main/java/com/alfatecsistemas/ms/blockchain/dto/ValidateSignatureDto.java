@@ -6,6 +6,12 @@ public class ValidateSignatureDto {
   private byte[] signedDocument;
   private byte[] publicKey;
 
+  public ValidateSignatureDto(final byte[] originalDocument, final byte[] signedDocument, final byte[] publicKey) {
+    this.originalDocument = originalDocument;
+    this.signedDocument = signedDocument;
+    this.publicKey = publicKey;
+  }
+
   public byte[] getOriginalDocument() {
     return originalDocument;
   }

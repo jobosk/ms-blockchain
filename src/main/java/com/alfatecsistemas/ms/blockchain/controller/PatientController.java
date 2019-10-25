@@ -50,7 +50,7 @@ public class PatientController {
     final PublicKey signerPublicKey = buildPublicKey(encryptionDto.getPublicKey(), encryptionDto.getPublicKeyAlgorithm());
     final byte[] encryptedPrivateKey = encrypt(patientService.getPrivateKey(), signerPublicKey, encryptionDto.getEncryptionAlgorithm());
     final byte[] signedDocument = signerClient.signDocument(new SignDocumentDto(document, encryptedPrivateKey));
-    return signerClient.validateDocumentSignature(new ValidateSignatureDto(signedDocument, patientService.getPublicKey()));
+    return signerClient.validateDocumentSignature(new ValidateSignatureDto(document, signedDocument, patientService.getPublicKey()));
   }
 
   private static PublicKey buildPublicKey(final byte[] key, final String algorithm) {
