@@ -6,9 +6,9 @@ public interface PatientService {
 
   String getCurrentBalance();
 
-  byte[] getPrivateKey();
+  String getHexPrivateKey();
 
-  byte[] getPublicKey();
+  String getHexPublicKey();
 
   String createPatient();
 

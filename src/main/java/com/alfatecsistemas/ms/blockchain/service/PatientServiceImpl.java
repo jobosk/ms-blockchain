@@ -1,5 +1,6 @@
 package com.alfatecsistemas.ms.blockchain.service;
 
+import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -98,26 +99,26 @@ public class PatientServiceImpl implements PatientService {
     return balance;
   }
 
-  public byte[] getPrivateKey() {
-    byte[] result;
+  public String getHexPrivateKey() {
+    String result;
     try {
       final Credentials credentials = WalletUtils.loadCredentials(walletPassword, walletFilePath);
-      result = credentials.getEcKeyPair().getPrivateKey().toByteArray();
+      result = credentials.getEcKeyPair().getPrivateKey().toString(16);
     } catch (final Exception e) {
       log.error("", e);
-      result = new byte[0];
+      result = null;
     }
     return result;
   }
 
-  public byte[] getPublicKey() {
-    byte[] result;
+  public String getHexPublicKey() {
+    String result;
     try {
       final Credentials credentials = WalletUtils.loadCredentials(walletPassword, walletFilePath);
-      result = credentials.getEcKeyPair().getPublicKey().toByteArray();
+      result = credentials.getEcKeyPair().getPublicKey().toString(16);
     } catch (final Exception e) {
       log.error("", e);
-      result = new byte[0];
+      result = null;
     }
     return result;
   }
