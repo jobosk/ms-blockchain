@@ -14,3 +14,9 @@ management:
       enabled: true
     prometheus:
       enabled: true
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 160000000
+        readTimeout: 160000000
