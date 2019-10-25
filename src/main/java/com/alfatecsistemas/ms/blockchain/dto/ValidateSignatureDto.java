@@ -2,12 +2,16 @@ package com.alfatecsistemas.ms.blockchain.dto;
 
 public class ValidateSignatureDto {
 
+  private byte[] originalDocument;
   private byte[] signedDocument;
   private byte[] publicKey;
 
-  public ValidateSignatureDto(final byte[] signedDocument, final byte[] publicKey) {
-    this.signedDocument = signedDocument;
-    this.publicKey = publicKey;
+  public byte[] getOriginalDocument() {
+    return originalDocument;
+  }
+
+  public void setOriginalDocument(final byte[] originalDocument) {
+    this.originalDocument = originalDocument;
   }
 
   public byte[] getSignedDocument() {
