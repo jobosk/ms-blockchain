@@ -1,6 +1,5 @@
 package com.alfatecsistemas.ms.blockchain.service;
 
-import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -14,12 +13,14 @@ import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.websocket.WebSocketService;
 import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Convert;
+import org.web3j.utils.Numeric;
 
 import com.alfatecsistemas.ms.blockchain.Constants;
 import com.alfatecsistemas.ms.blockchain.contract.Patient;
 
 import java.math.BigInteger;
 import java.net.ConnectException;
+import java.util.Arrays;
 
 @Service
 public class PatientServiceImpl implements PatientService {
@@ -111,16 +112,23 @@ public class PatientServiceImpl implements PatientService {
     return result;
   }
 
-  public String getHexPublicKey() {
-    String result;
+  public BigInteger[] getCoordsPublicKey() {
+    BigInteger[] result;
     try {
       final Credentials credentials = WalletUtils.loadCredentials(walletPassword, walletFilePath);
-      result = credentials.getEcKeyPair().getPublicKey().toString(16);
+      result = createECPoint(credentials.getEcKeyPair().getPublicKey());
     } catch (final Exception e) {
       log.error("", e);
       result = null;
     }
     return result;
+  }
+
+  private static BigInteger[] createECPoint(final BigInteger publicKey) {
+    final byte[] bytes = Numeric.toBytesPadded(publicKey, 64);
+    final BigInteger x = Numeric.toBigInt(Arrays.copyOfRange(bytes, 0, 32));
+    final BigInteger y = Numeric.toBigInt(Arrays.copyOfRange(bytes, 32, 64));
+    return new BigInteger[] {x, y};
   }
 
   private Patient getPatient(final String contractAddress) {

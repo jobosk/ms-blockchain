@@ -54,7 +54,7 @@ public class PatientController {
         encryptionDto.getEncryptionAlgorithm());
     final byte[] signedDocument = signerClient.signDocument(new SignDocumentDto(document, encryptedHexPrivateKey));
     return signerClient.validateDocumentSignature(
-        new ValidateSignatureDto(document, signedDocument, patientService.getHexPublicKey()));
+        new ValidateSignatureDto(document, signedDocument, patientService.getCoordsPublicKey()));
   }
 
   private static PublicKey buildPublicKey(final String hexKey, final String algorithm) {

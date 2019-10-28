@@ -1,15 +1,18 @@
 package com.alfatecsistemas.ms.blockchain.dto;
 
+import java.math.BigInteger;
+
 public class ValidateSignatureDto {
 
   private byte[] originalDocument;
   private byte[] signedDocument;
-  private String hexPublicKey;
+  private BigInteger[] coordsPublicKey;
 
-  public ValidateSignatureDto(final byte[] originalDocument, final byte[] signedDocument, final String hexPublicKey) {
+  public ValidateSignatureDto(final byte[] originalDocument, final byte[] signedDocument,
+      final BigInteger[] coordsPublicKey) {
     this.originalDocument = originalDocument;
     this.signedDocument = signedDocument;
-    this.hexPublicKey = hexPublicKey;
+    this.coordsPublicKey = coordsPublicKey;
   }
 
   public byte[] getOriginalDocument() {
@@ -28,11 +31,11 @@ public class ValidateSignatureDto {
     this.signedDocument = signedDocument;
   }
 
-  public String getHexPublicKey() {
-    return hexPublicKey;
+  public BigInteger[] getCoordsPublicKey() {
+    return coordsPublicKey;
   }
 
-  public void setHexPublicKey(final String hexPublicKey) {
-    this.hexPublicKey = hexPublicKey;
+  public void setCoordsPublicKey(final BigInteger[] coordsPublicKey) {
+    this.coordsPublicKey = coordsPublicKey;
   }
 }
