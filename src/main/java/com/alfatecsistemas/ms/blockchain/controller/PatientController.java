@@ -46,7 +46,7 @@ public class PatientController {
 
   @GetMapping(value = "/signature/test/{message}")
   public boolean testSignature(final @PathVariable("message") String message) {
-    final byte[] document = Base64.getDecoder().decode(message);
+    final byte[] document = formatDocument(message);
     final EncryptionDto encryptionDto = signerClient.getEncryptionSpecs();
     final PublicKey signerPublicKey =
         buildPublicKey(encryptionDto.getHexPublicKey(), encryptionDto.getPublicKeyAlgorithm());
@@ -55,6 +55,16 @@ public class PatientController {
     final byte[] signedDocument = signerClient.signDocument(new SignDocumentDto(document, encryptedHexPrivateKey));
     return signerClient.validateDocumentSignature(
         new ValidateSignatureDto(document, signedDocument, patientService.getHexPublicKey()));
+  }
+
+  private static byte[] formatDocument(final String document) {
+    byte[] result;
+    try {
+      result = document.getBytes("UTF-8");
+    } catch (final Exception e) {
+      result = new byte[0];
+    }
+    return result;
   }
 
   private static PublicKey buildPublicKey(final String hexKey, final String algorithm) {
