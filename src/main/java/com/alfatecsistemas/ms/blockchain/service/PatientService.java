@@ -8,7 +8,7 @@ public interface PatientService {
 
   String getHexPrivateKey();
 
-  BigInteger[] getCoordsPublicKey();
+  String getHexPublicKey();
 
   String createPatient();
 
