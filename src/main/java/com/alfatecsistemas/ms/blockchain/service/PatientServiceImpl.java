@@ -19,7 +19,6 @@ import com.alfatecsistemas.ms.blockchain.contract.Patient;
 
 import java.math.BigInteger;
 import java.net.ConnectException;
-import java.util.Base64;
 
 @Service
 public class PatientServiceImpl implements PatientService {
@@ -99,11 +98,11 @@ public class PatientServiceImpl implements PatientService {
     return balance;
   }
 
-  public byte[] getPrivateKey() {
-    byte[] result;
+  public String getPrivateKey() {
+    String result;
     try {
       final Credentials credentials = WalletUtils.loadCredentials(walletPassword, walletFilePath);
-      result = credentials.getEcKeyPair().getPrivateKey().toByteArray();
+      result = credentials.getEcKeyPair().getPrivateKey().toString(16);
     } catch (final Exception e) {
       log.error("", e);
       result = null;
@@ -111,11 +110,11 @@ public class PatientServiceImpl implements PatientService {
     return result;
   }
 
-  public byte[] getPublicKey() {
-    byte[] result;
+  public String getPublicKey() {
+    String result;
     try {
       final Credentials credentials = WalletUtils.loadCredentials(walletPassword, walletFilePath);
-      result = credentials.getEcKeyPair().getPublicKey().toByteArray();
+      result = credentials.getEcKeyPair().getPublicKey().toString(16);
     } catch (final Exception e) {
       log.error("", e);
       result = null;
