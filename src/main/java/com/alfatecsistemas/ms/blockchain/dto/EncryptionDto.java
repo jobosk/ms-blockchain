@@ -2,22 +2,22 @@ package com.alfatecsistemas.ms.blockchain.dto;
 
 public class EncryptionDto {
 
-  private String hexPublicKey;
+  private String publicKey;
   private String publicKeyAlgorithm;
   private String encryptionAlgorithm;
 
-  public EncryptionDto(final String hexPublicKey, final String publicKeyAlgorithm, final String encryptionAlgorithm) {
-    this.hexPublicKey = hexPublicKey;
+  public EncryptionDto(final String publicKey, final String publicKeyAlgorithm, final String encryptionAlgorithm) {
+    this.publicKey = publicKey;
     this.publicKeyAlgorithm = publicKeyAlgorithm;
     this.encryptionAlgorithm = encryptionAlgorithm;
   }
 
-  public String getHexPublicKey() {
-    return hexPublicKey;
+  public String getPublicKey() {
+    return publicKey;
   }
 
-  public void setHexPublicKey(final String hexPublicKey) {
-    this.hexPublicKey = hexPublicKey;
+  public void setPublicKey(final String publicKey) {
+    this.publicKey = publicKey;
   }
 
   public String getPublicKeyAlgorithm() {

@@ -22,7 +22,6 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 import javax.crypto.Cipher;
-import javax.xml.bind.DatatypeConverter;
 
 @RestController
 @RequestMapping("/blockchain")
@@ -49,12 +48,12 @@ public class PatientController {
     final byte[] document = formatDocument(message);
     final EncryptionDto encryptionDto = signerClient.getEncryptionSpecs();
     final PublicKey signerPublicKey =
-        buildPublicKey(encryptionDto.getHexPublicKey(), encryptionDto.getPublicKeyAlgorithm());
-    final String encryptedHexPrivateKey = encryptHexPrivateKey(patientService.getHexPrivateKey(), signerPublicKey,
-        encryptionDto.getEncryptionAlgorithm());
-    final byte[] signedDocument = signerClient.signDocument(new SignDocumentDto(document, encryptedHexPrivateKey));
+        buildPublicKey(decodeBase64(encryptionDto.getPublicKey()), encryptionDto.getPublicKeyAlgorithm());
+    final String encodedEncryptedPrivateKey =
+        encodeBase64(encrypt(patientService.getPrivateKey(), signerPublicKey, encryptionDto.getEncryptionAlgorithm()));
+    final byte[] signedDocument = signerClient.signDocument(new SignDocumentDto(document, encodedEncryptedPrivateKey));
     return signerClient.validateDocumentSignature(
-        new ValidateSignatureDto(document, signedDocument, patientService.getHexPublicKey()));
+        new ValidateSignatureDto(document, signedDocument, encodeBase64(patientService.getPublicKey())));
   }
 
   private static byte[] formatDocument(final String document) {
@@ -67,8 +66,8 @@ public class PatientController {
     return result;
   }
 
-  private static PublicKey buildPublicKey(final String hexKey, final String algorithm) {
-    return buildPublicKey(DatatypeConverter.parseHexBinary(hexKey), algorithm);
+  private static byte[] decodeBase64(final String encoded) {
+    return Base64.getDecoder().decode(encoded);
   }
 
   private static PublicKey buildPublicKey(final byte[] key, final String algorithm) {
@@ -83,8 +82,8 @@ public class PatientController {
     return result;
   }
 
-  private static String encryptHexPrivateKey(final String hexKey, final Key key, final String algorithm) {
-    return DatatypeConverter.printHexBinary(encrypt(DatatypeConverter.parseHexBinary(hexKey), key, algorithm));
+  private static String encodeBase64(final byte[] decoded) {
+    return Base64.getEncoder().encodeToString(decoded);
   }
 
   private static byte[] encrypt(final byte[] data, final Key key, final String algorithm) {

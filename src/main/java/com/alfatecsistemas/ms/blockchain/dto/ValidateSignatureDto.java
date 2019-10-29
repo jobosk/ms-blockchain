@@ -4,12 +4,12 @@ public class ValidateSignatureDto {
 
   private byte[] originalDocument;
   private byte[] signedDocument;
-  private String hexPublicKey;
+  private String publicKey;
 
-  public ValidateSignatureDto(final byte[] originalDocument, final byte[] signedDocument, final String hexPublicKey) {
+  public ValidateSignatureDto(final byte[] originalDocument, final byte[] signedDocument, final String publicKey) {
     this.originalDocument = originalDocument;
     this.signedDocument = signedDocument;
-    this.hexPublicKey = hexPublicKey;
+    this.publicKey = publicKey;
   }
 
   public byte[] getOriginalDocument() {
@@ -28,11 +28,11 @@ public class ValidateSignatureDto {
     this.signedDocument = signedDocument;
   }
 
-  public String getHexPublicKey() {
-    return hexPublicKey;
+  public String getPublicKey() {
+    return publicKey;
   }
 
-  public void setHexPublicKey(final String hexPublicKey) {
-    this.hexPublicKey = hexPublicKey;
+  public void setPublicKey(final String publicKey) {
+    this.publicKey = publicKey;
   }
 }

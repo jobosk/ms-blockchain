@@ -3,11 +3,11 @@ package com.alfatecsistemas.ms.blockchain.dto;
 public class SignDocumentDto {
 
   private byte[] document;
-  private String encryptedHexPrivateKey;
+  private String encryptedPrivateKey;
 
-  public SignDocumentDto(final byte[] document, final String encryptedHexPrivateKey) {
+  public SignDocumentDto(final byte[] document, final String encryptedPrivateKey) {
     this.document = document;
-    this.encryptedHexPrivateKey = encryptedHexPrivateKey;
+    this.encryptedPrivateKey = encryptedPrivateKey;
   }
 
   public byte[] getDocument() {
@@ -18,11 +18,11 @@ public class SignDocumentDto {
     this.document = document;
   }
 
-  public String getEncryptedHexPrivateKey() {
-    return encryptedHexPrivateKey;
+  public String getEncryptedPrivateKey() {
+    return encryptedPrivateKey;
   }
 
-  public void setEncryptedHexPrivateKey(final String encryptedHexPrivateKey) {
-    this.encryptedHexPrivateKey = encryptedHexPrivateKey;
+  public void setEncryptedPrivateKey(final String encryptedPrivateKey) {
+    this.encryptedPrivateKey = encryptedPrivateKey;
   }
 }
