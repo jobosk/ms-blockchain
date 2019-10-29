@@ -19,7 +19,6 @@ import com.alfatecsistemas.ms.blockchain.contract.Patient;
 
 import java.math.BigInteger;
 import java.net.ConnectException;
-import java.util.Base64;
 
 @Service
 public class PatientServiceImpl implements PatientService {
