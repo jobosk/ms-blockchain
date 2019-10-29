@@ -103,7 +103,7 @@ public class PatientServiceImpl implements PatientService {
     String result;
     try {
       final Credentials credentials = WalletUtils.loadCredentials(walletPassword, walletFilePath);
-      result = credentials.getEcKeyPair().getPrivateKey().toString(64);
+      result = credentials.getEcKeyPair().getPrivateKey().toString(16);
     } catch (final Exception e) {
       log.error("", e);
       result = null;
@@ -115,7 +115,7 @@ public class PatientServiceImpl implements PatientService {
     String result;
     try {
       final Credentials credentials = WalletUtils.loadCredentials(walletPassword, walletFilePath);
-      result = credentials.getEcKeyPair().getPublicKey().toString(64);
+      result = credentials.getEcKeyPair().getPublicKey().toString(16);
     } catch (final Exception e) {
       log.error("", e);
       result = null;
