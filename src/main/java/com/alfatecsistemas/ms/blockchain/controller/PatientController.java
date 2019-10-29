@@ -1,6 +1,5 @@
 package com.alfatecsistemas.ms.blockchain.controller;
 
-import org.bouncycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,18 +53,18 @@ public class PatientController {
     final byte[] signerPublicKeyDecoded = decodeBase64(encryptionDto.getPublicKey());
     final PublicKey signerPublicKey = buildPublicKey(signerPublicKeyDecoded, encryptionDto.getPublicKeyAlgorithm());
 
-    final String senderPrivateKeyEncoded = patientService.getPrivateKey();
-    final byte[] senderPrivateKeyDecoded = Hex.decode(senderPrivateKeyEncoded);
+    final byte[] senderPrivateKeyDecoded = patientService.getPrivateKey();
     final byte[] senderPrivateKeyEncrypted =
         encrypt(senderPrivateKeyDecoded, signerPublicKey, encryptionDto.getEncryptionAlgorithm());
     final String senderPrivateKeyEncryptedEncoded = encodeBase64(senderPrivateKeyEncrypted);
 
     final byte[] signature = signerClient.signDocument(new SignDocumentDto(document, senderPrivateKeyEncryptedEncoded));
 
-    final String senderPublicKeyEncoded = patientService.getPublicKey();
+    final byte[] senderPublicKeyDecoded = patientService.getPublicKey();
+    final String senderPublicKeyEncoded = encodeBase64(senderPublicKeyDecoded);
 
-    return signerClient.validateDocumentSignature(
-        new ValidateSignatureDto(document, signature, senderPublicKeyEncoded));
+    return signerClient
+        .validateDocumentSignature(new ValidateSignatureDto(document, signature, senderPublicKeyEncoded));
   }
 
   private static byte[] formatDocument(final String document) {
