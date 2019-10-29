@@ -53,15 +53,15 @@ public class PatientController {
     final byte[] signerPublicKeyDecoded = decodeBase64(encryptionDto.getPublicKey());
     final PublicKey signerPublicKey = buildPublicKey(signerPublicKeyDecoded, encryptionDto.getPublicKeyAlgorithm());
 
-    final byte[] senderPrivateKeyDecoded = patientService.getPrivateKey();
+    final String senderPrivateKeyEncoded = patientService.getPrivateKey();
+    final byte[] senderPrivateKeyDecoded = decodeBase64(senderPrivateKeyEncoded);
     final byte[] senderPrivateKeyEncrypted =
         encrypt(senderPrivateKeyDecoded, signerPublicKey, encryptionDto.getEncryptionAlgorithm());
     final String senderPrivateKeyEncryptedEncoded = encodeBase64(senderPrivateKeyEncrypted);
 
     final byte[] signature = signerClient.signDocument(new SignDocumentDto(document, senderPrivateKeyEncryptedEncoded));
 
-    final byte[] senderPublicKeyDecoded = patientService.getPublicKey();
-    final String senderPublicKeyEncoded = encodeBase64(senderPublicKeyDecoded);
+    final String senderPublicKeyEncoded = patientService.getPublicKey();
 
     return signerClient.validateDocumentSignature(
         new ValidateSignatureDto(document, signature, senderPublicKeyEncoded));

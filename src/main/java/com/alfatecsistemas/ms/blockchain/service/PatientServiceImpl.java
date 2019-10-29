@@ -99,26 +99,26 @@ public class PatientServiceImpl implements PatientService {
     return balance;
   }
 
-  public byte[] getPrivateKey() {
-    byte[] result;
+  public String getPrivateKey() {
+    String result;
     try {
       final Credentials credentials = WalletUtils.loadCredentials(walletPassword, walletFilePath);
-      result = credentials.getEcKeyPair().getPrivateKey().toByteArray();
+      result = credentials.getEcKeyPair().getPrivateKey().toString(64);
     } catch (final Exception e) {
       log.error("", e);
-      result = new byte[0];
+      result = null;
     }
     return result;
   }
 
-  public byte[] getPublicKey() {
-    byte[] result;
+  public String getPublicKey() {
+    String result;
     try {
       final Credentials credentials = WalletUtils.loadCredentials(walletPassword, walletFilePath);
-      result = credentials.getEcKeyPair().getPublicKey().toByteArray();
+      result = credentials.getEcKeyPair().getPublicKey().toString(64);
     } catch (final Exception e) {
       log.error("", e);
-      result = new byte[0];
+      result = null;
     }
     return result;
   }
