@@ -45,15 +45,26 @@ public class PatientController {
 
   @GetMapping(value = "/signature/test/{message}")
   public boolean testSignature(final @PathVariable("message") String message) {
+
     final byte[] document = formatDocument(message);
+
     final EncryptionDto encryptionDto = signerClient.getEncryptionSpecs();
-    final PublicKey signerPublicKey =
-        buildPublicKey(decodeBase64(encryptionDto.getPublicKey()), encryptionDto.getPublicKeyAlgorithm());
-    final String encodedEncryptedPrivateKey =
-        encodeBase64(encrypt(patientService.getPrivateKey(), signerPublicKey, encryptionDto.getEncryptionAlgorithm()));
-    final byte[] signedDocument = signerClient.signDocument(new SignDocumentDto(document, encodedEncryptedPrivateKey));
+
+    final byte[] signerPublicKeyDecoded = decodeBase64(encryptionDto.getPublicKey());
+    final PublicKey signerPublicKey = buildPublicKey(signerPublicKeyDecoded, encryptionDto.getPublicKeyAlgorithm());
+
+    final byte[] senderPrivateKeyDecoded = patientService.getPrivateKey();
+    final byte[] senderPrivateKeyEncrypted =
+        encrypt(senderPrivateKeyDecoded, signerPublicKey, encryptionDto.getEncryptionAlgorithm());
+    final String senderPrivateKeyEncryptedEncoded = encodeBase64(senderPrivateKeyEncrypted);
+
+    final byte[] signature = signerClient.signDocument(new SignDocumentDto(document, senderPrivateKeyEncryptedEncoded));
+
+    final byte[] senderPublicKeyDecoded = patientService.getPublicKey();
+    final String senderPublicKeyEncoded = encodeBase64(senderPublicKeyDecoded);
+
     return signerClient.validateDocumentSignature(
-        new ValidateSignatureDto(document, signedDocument, encodeBase64(patientService.getPublicKey())));
+        new ValidateSignatureDto(document, signature, senderPublicKeyEncoded));
   }
 
   private static byte[] formatDocument(final String document) {
