@@ -14,6 +14,7 @@ import com.alfatecsistemas.ms.blockchain.feign.SignerFeign;
 import com.alfatecsistemas.ms.blockchain.service.PatientService;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.PublicKey;
@@ -43,8 +44,8 @@ public class PatientController {
     return patientService.getPatientInfo(address);
   }
 
-  @GetMapping(value = "/signature/test/{message}")
-  public boolean testSignature(final @PathVariable("message") String message) {
+  @GetMapping(value = "/sign/{message}")
+  public String signMessage(final @PathVariable("message") String message) {
 
     final byte[] document = formatDocument(message);
 
@@ -58,19 +59,31 @@ public class PatientController {
         encrypt(senderPrivateKeyDecoded, signerPublicKey, encryptionDto.getEncryptionAlgorithm());
     final String senderPrivateKeyEncryptedEncoded = encodeBase64(senderPrivateKeyEncrypted);
 
-    final byte[] signature = signerClient.signDocument(new SignDocumentDto(document, senderPrivateKeyEncryptedEncoded));
+    final byte[] signature =
+        signerClient.signDocument(new SignDocumentDto(document, senderPrivateKeyEncryptedEncoded, "EC"));
+
+    return encodeBase64(signature);
+  }
+
+  @GetMapping(value = "/verify/{message}/{signature}")
+  public boolean verifySignatureMessage(final @PathVariable("message") String message,
+      final @PathVariable("signature") String signature) {
+
+    final byte[] document = formatDocument(message);
+
+    final byte[] signatureDecoded = decodeBase64(signature);
 
     final byte[] senderPublicKeyDecoded = patientService.getPublicKey();
     final String senderPublicKeyEncoded = encodeBase64(senderPublicKeyDecoded);
 
     return signerClient
-        .validateDocumentSignature(new ValidateSignatureDto(document, signature, senderPublicKeyEncoded));
+        .validateDocumentSignature(new ValidateSignatureDto(document, signatureDecoded, senderPublicKeyEncoded, "EC"));
   }
 
   private static byte[] formatDocument(final String document) {
     byte[] result;
     try {
-      result = document.getBytes("UTF-8");
+      result = document.getBytes(StandardCharsets.UTF_8);
     } catch (final Exception e) {
       result = new byte[0];
     }

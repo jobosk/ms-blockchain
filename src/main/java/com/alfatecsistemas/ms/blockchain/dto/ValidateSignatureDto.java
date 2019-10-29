@@ -5,11 +5,14 @@ public class ValidateSignatureDto {
   private byte[] originalDocument;
   private byte[] signedDocument;
   private String publicKey;
+  private String publicKeyAlgorithm;
 
-  public ValidateSignatureDto(final byte[] originalDocument, final byte[] signedDocument, final String publicKey) {
+  public ValidateSignatureDto(final byte[] originalDocument, final byte[] signedDocument, final String publicKey,
+      final String publicKeyAlgorithm) {
     this.originalDocument = originalDocument;
     this.signedDocument = signedDocument;
     this.publicKey = publicKey;
+    this.publicKeyAlgorithm = publicKeyAlgorithm;
   }
 
   public byte[] getOriginalDocument() {
@@ -34,5 +37,13 @@ public class ValidateSignatureDto {
 
   public void setPublicKey(final String publicKey) {
     this.publicKey = publicKey;
+  }
+
+  public String getPublicKeyAlgorithm() {
+    return publicKeyAlgorithm;
+  }
+
+  public void setPublicKeyAlgorithm(final String publicKeyAlgorithm) {
+    this.publicKeyAlgorithm = publicKeyAlgorithm;
   }
 }
