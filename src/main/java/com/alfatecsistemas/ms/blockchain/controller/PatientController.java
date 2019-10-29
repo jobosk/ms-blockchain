@@ -53,15 +53,15 @@ public class PatientController {
     final byte[] signerPublicKeyDecoded = decodeBase64(encryptionDto.getPublicKey());
     final PublicKey signerPublicKey = buildPublicKey(signerPublicKeyDecoded, encryptionDto.getPublicKeyAlgorithm());
 
-    final String senderPrivateKeyEncoded = patientService.getPrivateKey();
-    final byte[] senderPrivateKeyDecoded = decodeBase16(senderPrivateKeyEncoded);
+    final byte[] senderPrivateKeyDecoded = patientService.getPrivateKey();
     final byte[] senderPrivateKeyEncrypted =
         encrypt(senderPrivateKeyDecoded, signerPublicKey, encryptionDto.getEncryptionAlgorithm());
     final String senderPrivateKeyEncryptedEncoded = encodeBase64(senderPrivateKeyEncrypted);
 
     final byte[] signature = signerClient.signDocument(new SignDocumentDto(document, senderPrivateKeyEncryptedEncoded));
 
-    final String senderPublicKeyEncoded = patientService.getPublicKey();
+    final byte[] senderPublicKeyDecoded = patientService.getPublicKey();
+    final String senderPublicKeyEncoded = encodeBase64(senderPublicKeyDecoded);
 
     return signerClient
         .validateDocumentSignature(new ValidateSignatureDto(document, signature, senderPublicKeyEncoded));
@@ -75,17 +75,6 @@ public class PatientController {
       result = new byte[0];
     }
     return result;
-  }
-
-  public static byte[] decodeBase16(final String encoded) {
-    if (encoded == null || encoded.isEmpty()) {
-      return null;
-    }
-    final byte[] bytes = new byte[encoded.length() / 2];
-    for (int i = 0; i < bytes.length; i++) {
-      bytes[i] = (byte) Integer.parseInt(encoded.substring(2 * i, 2 * i + 2), 16);
-    }
-    return bytes;
   }
 
   private static byte[] decodeBase64(final String encoded) {
