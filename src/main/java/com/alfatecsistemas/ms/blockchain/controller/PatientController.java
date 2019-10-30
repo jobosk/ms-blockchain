@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alfatecsistemas.ms.blockchain.dto.EncryptionDto;
+import com.alfatecsistemas.ms.blockchain.dto.KeyDto;
 import com.alfatecsistemas.ms.blockchain.feign.SignerFeign;
 import com.alfatecsistemas.ms.blockchain.service.PatientService;
 
@@ -25,6 +25,10 @@ import javax.crypto.Cipher;
 @RequestMapping("/blockchain")
 public class PatientController {
 
+  private static final String EC_ALGORITHM = "EC";
+  private static final String EC_CURVE_NAME = "secp256k1";
+  private static final String ENCRYPTION = "RSA/ECB/PKCS1Padding";
+
   @Autowired
   PatientService patientService;
 
@@ -32,12 +36,12 @@ public class PatientController {
   private SignerFeign signerClient;
 
   private byte[] encryptPrivateKey(final byte[] privateKey) {
-    final EncryptionDto encryptionDto = signerClient.getEncryptionSpecs();
+    final KeyDto publicKeyDto = signerClient.getPublicKey();
     final PublicKey signerPublicKey = buildPublicKey(
-        Base64.getDecoder().decode(encryptionDto.getPublicKey())
-        , encryptionDto.getPublicKeyAlgorithm()
+        Base64.getDecoder().decode(publicKeyDto.getKey())
+        , publicKeyDto.getAlgorithm()
     );
-    return encrypt(privateKey, signerPublicKey, encryptionDto.getEncryptionAlgorithm());
+    return encrypt(privateKey, signerPublicKey, ENCRYPTION);
   }
 
   private static PublicKey buildPublicKey(final byte[] key, final String algorithm) {
@@ -65,13 +69,23 @@ public class PatientController {
   }
 
   @GetMapping(value = "/key/private")
-  public String getPrivateKey() {
-    return Base64.getEncoder().encodeToString(encryptPrivateKey(patientService.getPrivateKey()));
+  public KeyDto getPrivateKey() {
+    return new KeyDto(
+        Base64.getEncoder().encodeToString(encryptPrivateKey(patientService.getPrivateKey()))
+        , EC_ALGORITHM
+        , ENCRYPTION
+        , EC_CURVE_NAME
+    );
   }
 
   @GetMapping(value = "/key/public")
-  public String getPublicKey() {
-    return Base64.getEncoder().encodeToString(patientService.getPublicKey());
+  public KeyDto getPublicKey() {
+    return new KeyDto(
+        Base64.getEncoder().encodeToString(patientService.getPublicKey())
+        , EC_ALGORITHM
+        , null
+        , EC_CURVE_NAME
+    );
   }
 
   @PostMapping(value = "/patient")
