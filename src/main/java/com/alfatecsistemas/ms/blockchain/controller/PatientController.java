@@ -11,16 +11,11 @@ import com.alfatecsistemas.ms.blockchain.feign.SignerFeign;
 import com.alfatecsistemas.ms.blockchain.service.PatientService;
 import com.alfatecsistemas.ms.common.Constants.Algorithm;
 import com.alfatecsistemas.ms.common.dto.KeyDto;
+import com.alfatecsistemas.ms.common.util.CryptoUtil;
+import com.alfatecsistemas.ms.common.util.EncodingUtil;
 
 import java.math.BigInteger;
-import java.security.Key;
-import java.security.KeyFactory;
 import java.security.PublicKey;
-import java.security.spec.EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
-
-import javax.crypto.Cipher;
 
 @RestController
 @RequestMapping("/blockchain")
@@ -33,32 +28,14 @@ public class PatientController {
   private SignerFeign signerClient;
 
   private byte[] encryptPrivateKey(final byte[] privateKey) {
-    final KeyDto publicKeyDto = signerClient.getPublicKey();
-    final PublicKey signerPublicKey = buildPublicKey(
-        Base64.getDecoder().decode(publicKeyDto.getKey())
-        , publicKeyDto.getAlgorithm()
-    );
-    return encrypt(privateKey, signerPublicKey, Algorithm.ENCRYPTION);
-  }
-
-  private static PublicKey buildPublicKey(final byte[] key, final String algorithm) {
-    PublicKey result;
-    try {
-      final EncodedKeySpec encodedKeySpec = new X509EncodedKeySpec(key);
-      final KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
-      result = keyFactory.generatePublic(encodedKeySpec);
-    } catch (final Exception e) {
-      result = null;
-    }
-    return result;
-  }
-
-  private static byte[] encrypt(final byte[] data, final Key key, final String algorithm) {
     byte[] result;
     try {
-      final Cipher cipher = Cipher.getInstance(algorithm);
-      cipher.init(Cipher.ENCRYPT_MODE, key);
-      result = cipher.doFinal(data);
+      final KeyDto publicKeyDto = signerClient.getPublicKey();
+      final PublicKey signerPublicKey = CryptoUtil.buildPublicKey(
+          EncodingUtil.decodeBase16(publicKeyDto.getKey())
+          , publicKeyDto.getAlgorithm()
+      );
+      result = CryptoUtil.encrypt(privateKey, signerPublicKey, Algorithm.ENCRYPTION);
     } catch (final Exception e) {
       result = new byte[0];
     }
@@ -68,7 +45,7 @@ public class PatientController {
   @GetMapping(value = "/key/private")
   public KeyDto getPrivateKey() {
     return new KeyDto(
-        Base64.getEncoder().encodeToString(encryptPrivateKey(patientService.getPrivateKey()))
+        EncodingUtil.encodeBase64(encryptPrivateKey(patientService.getPrivateKey()))
         , Algorithm.EC
         , Algorithm.ENCRYPTION
         , Algorithm.EC_CURVE_NAME
@@ -78,7 +55,7 @@ public class PatientController {
   @GetMapping(value = "/key/public")
   public KeyDto getPublicKey() {
     return new KeyDto(
-        Base64.getEncoder().encodeToString(patientService.getPublicKey())
+        EncodingUtil.encodeBase64(patientService.getPublicKey())
         , Algorithm.EC
         , null
         , Algorithm.EC_CURVE_NAME
