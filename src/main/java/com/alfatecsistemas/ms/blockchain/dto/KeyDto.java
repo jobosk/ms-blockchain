@@ -7,6 +7,10 @@ public class KeyDto {
   private String encryption;
   private String curveName;
 
+  public KeyDto() {
+    // Empty constructor
+  }
+
   public KeyDto(final String key, final String algorithm) {
     this(key, algorithm, null, null);
   }
