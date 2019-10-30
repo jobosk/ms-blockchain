@@ -31,6 +31,15 @@ public class PatientController {
   @Autowired
   private SignerFeign signerClient;
 
+  private byte[] encryptPrivateKey(final byte[] privateKey) {
+    final EncryptionDto encryptionDto = signerClient.getEncryptionSpecs();
+    final PublicKey signerPublicKey = buildPublicKey(
+        Base64.getDecoder().decode(encryptionDto.getPublicKey())
+        , encryptionDto.getPublicKeyAlgorithm()
+    );
+    return encrypt(privateKey, signerPublicKey, encryptionDto.getEncryptionAlgorithm());
+  }
+
   private static PublicKey buildPublicKey(final byte[] key, final String algorithm) {
     PublicKey result;
     try {
@@ -57,12 +66,7 @@ public class PatientController {
 
   @GetMapping(value = "/key/private")
   public String getPrivateKey() {
-    final EncryptionDto encryptionDto = signerClient.getEncryptionSpecs();
-    final PublicKey signerPublicKey =
-        buildPublicKey(Base64.getDecoder().decode(encryptionDto.getPublicKey()), encryptionDto.getPublicKeyAlgorithm());
-    return Base64.getEncoder().encodeToString(
-        encrypt(patientService.getPrivateKey(), signerPublicKey, encryptionDto.getEncryptionAlgorithm())
-    );
+    return Base64.getEncoder().encodeToString(encryptPrivateKey(patientService.getPrivateKey()));
   }
 
   @GetMapping(value = "/key/public")
