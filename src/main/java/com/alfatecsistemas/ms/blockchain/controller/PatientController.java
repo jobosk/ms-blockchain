@@ -7,9 +7,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alfatecsistemas.ms.blockchain.dto.KeyDto;
 import com.alfatecsistemas.ms.blockchain.feign.SignerFeign;
 import com.alfatecsistemas.ms.blockchain.service.PatientService;
+import com.alfatecsistemas.ms.common.Constants.Algorithm;
+import com.alfatecsistemas.ms.common.dto.KeyDto;
 
 import java.math.BigInteger;
 import java.security.Key;
@@ -25,10 +26,6 @@ import javax.crypto.Cipher;
 @RequestMapping("/blockchain")
 public class PatientController {
 
-  private static final String EC_ALGORITHM = "EC";
-  private static final String EC_CURVE_NAME = "secp256k1";
-  private static final String ENCRYPTION = "RSA/ECB/PKCS1Padding";
-
   @Autowired
   PatientService patientService;
 
@@ -41,7 +38,7 @@ public class PatientController {
         Base64.getDecoder().decode(publicKeyDto.getKey())
         , publicKeyDto.getAlgorithm()
     );
-    return encrypt(privateKey, signerPublicKey, ENCRYPTION);
+    return encrypt(privateKey, signerPublicKey, Algorithm.ENCRYPTION);
   }
 
   private static PublicKey buildPublicKey(final byte[] key, final String algorithm) {
@@ -72,9 +69,9 @@ public class PatientController {
   public KeyDto getPrivateKey() {
     return new KeyDto(
         Base64.getEncoder().encodeToString(encryptPrivateKey(patientService.getPrivateKey()))
-        , EC_ALGORITHM
-        , ENCRYPTION
-        , EC_CURVE_NAME
+        , Algorithm.EC
+        , Algorithm.ENCRYPTION
+        , Algorithm.EC_CURVE_NAME
     );
   }
 
@@ -82,9 +79,9 @@ public class PatientController {
   public KeyDto getPublicKey() {
     return new KeyDto(
         Base64.getEncoder().encodeToString(patientService.getPublicKey())
-        , EC_ALGORITHM
+        , Algorithm.EC
         , null
-        , EC_CURVE_NAME
+        , Algorithm.EC_CURVE_NAME
     );
   }
 

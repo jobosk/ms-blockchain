@@ -14,8 +14,8 @@ import org.web3j.protocol.websocket.WebSocketService;
 import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Convert;
 
-import com.alfatecsistemas.ms.blockchain.Constants;
 import com.alfatecsistemas.ms.blockchain.contract.Patient;
+import com.alfatecsistemas.ms.common.Constants;
 
 import java.math.BigInteger;
 import java.net.ConnectException;

@@ -4,7 +4,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import com.alfatecsistemas.ms.blockchain.dto.KeyDto;
+import com.alfatecsistemas.ms.common.dto.KeyDto;
 
 @FeignClient("signer-service")
 @EnableAutoConfiguration
