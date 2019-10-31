@@ -2,8 +2,10 @@ package com.alfatecsistemas.ms.blockchain.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
@@ -15,15 +17,24 @@ import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Convert;
 
 import com.alfatecsistemas.ms.blockchain.contract.Patient;
+import com.alfatecsistemas.ms.blockchain.feign.SignerFeign;
 import com.alfatecsistemas.ms.common.Constants;
+import com.alfatecsistemas.ms.common.Constants.Algorithm;
+import com.alfatecsistemas.ms.common.dto.KeyDto;
+import com.alfatecsistemas.ms.common.util.CryptoUtil;
+import com.alfatecsistemas.ms.common.util.EncodingUtil;
 
 import java.math.BigInteger;
 import java.net.ConnectException;
+import java.security.PublicKey;
 
 @Service
 public class PatientServiceImpl implements PatientService {
 
   private static final Logger log = LoggerFactory.getLogger(PatientServiceImpl.class);
+
+  @Autowired
+  private SignerFeign signerClient;
 
   private static final String blockchainNetwork = "rinkeby.infura.io";
   private static final String blockchainProject = "d434e755cd164e8f8c4fca9545e63178";
@@ -98,11 +109,11 @@ public class PatientServiceImpl implements PatientService {
     return balance;
   }
 
-  public byte[] getPrivateKey() {
-    byte[] result;
+  private static ECKeyPair getKeyPair() {
+    ECKeyPair result;
     try {
       final Credentials credentials = WalletUtils.loadCredentials(walletPassword, walletFilePath);
-      result = credentials.getEcKeyPair().getPrivateKey().toByteArray();
+      result = credentials.getEcKeyPair();
     } catch (final Exception e) {
       log.error("", e);
       result = null;
@@ -110,16 +121,48 @@ public class PatientServiceImpl implements PatientService {
     return result;
   }
 
-  public byte[] getPublicKey() {
+  private static byte[] encryptPrivateKey(final byte[] privateKey, final KeyDto signerPublicKeyDto,
+      final String algorithm) {
     byte[] result;
     try {
-      final Credentials credentials = WalletUtils.loadCredentials(walletPassword, walletFilePath);
-      result = credentials.getEcKeyPair().getPublicKey().toByteArray();
+      final PublicKey signerPublicKey = CryptoUtil.buildPublicKey(
+          EncodingUtil.decodeBase64(signerPublicKeyDto.getKey())
+          , signerPublicKeyDto.getAlgorithm()
+      );
+      result = CryptoUtil.encrypt(
+          privateKey
+          , signerPublicKey
+          , algorithm
+      );
     } catch (final Exception e) {
       log.error("", e);
       result = null;
     }
     return result;
+  }
+
+  public KeyDto getPrivateKey() {
+    return new KeyDto(
+        EncodingUtil.encodeBase64(
+            encryptPrivateKey(
+                getKeyPair().getPrivateKey().toByteArray()
+                , signerClient.getPublicKey()
+                , Algorithm.ENCRYPT
+            )
+        )
+        , Algorithm.EC
+        , Algorithm.ENCRYPT
+        , Algorithm.EC_CURVE_NAME
+    );
+  }
+
+  public KeyDto getPublicKey() {
+    return new KeyDto(
+        EncodingUtil.encodeBase64(getKeyPair().getPublicKey().toByteArray())
+        , Algorithm.EC
+        , null
+        , Algorithm.EC_CURVE_NAME
+    );
   }
 
   private Patient getPatient(final String contractAddress) {

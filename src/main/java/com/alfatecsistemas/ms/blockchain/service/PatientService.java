@@ -1,14 +1,16 @@
 package com.alfatecsistemas.ms.blockchain.service;
 
+import com.alfatecsistemas.ms.common.dto.KeyDto;
+
 import java.math.BigInteger;
 
 public interface PatientService {
 
   String getCurrentBalance();
 
-  byte[] getPrivateKey();
+  KeyDto getPrivateKey();
 
-  byte[] getPublicKey();
+  KeyDto getPublicKey();
 
   String createPatient();
 
