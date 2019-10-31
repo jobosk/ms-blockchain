@@ -35,7 +35,7 @@ public class PatientController {
           EncodingUtil.decodeBase64(publicKeyDto.getKey())
           , publicKeyDto.getAlgorithm()
       );
-      result = CryptoUtil.encrypt(privateKey, signerPublicKey, Algorithm.ENCRYPTION);
+      result = CryptoUtil.encrypt(privateKey, signerPublicKey, Algorithm.ENCRYPT);
     } catch (final Exception e) {
       result = new byte[0];
     }
@@ -47,7 +47,7 @@ public class PatientController {
     return new KeyDto(
         EncodingUtil.encodeBase64(encryptPrivateKey(patientService.getPrivateKey()))
         , Algorithm.EC
-        , Algorithm.ENCRYPTION
+        , Algorithm.ENCRYPT
         , Algorithm.EC_CURVE_NAME
     );
   }
