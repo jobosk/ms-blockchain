@@ -32,7 +32,7 @@ public class PatientController {
     try {
       final KeyDto publicKeyDto = signerClient.getPublicKey();
       final PublicKey signerPublicKey = CryptoUtil.buildPublicKey(
-          EncodingUtil.decodeBase16(publicKeyDto.getKey())
+          EncodingUtil.decodeBase64(publicKeyDto.getKey())
           , publicKeyDto.getAlgorithm()
       );
       result = CryptoUtil.encrypt(privateKey, signerPublicKey, Algorithm.ENCRYPTION);
