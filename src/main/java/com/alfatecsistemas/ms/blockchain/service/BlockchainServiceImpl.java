@@ -24,6 +24,7 @@ import com.alfatecsistemas.ms.common.Constants;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 @Service
@@ -101,17 +102,17 @@ public class BlockchainServiceImpl implements BlockchainService {
   public <T extends Type, R> R executeGetMethod(final String from, final String to, final String methodName,
       final List<Type> inputParameters, final List<Class<T>> outputParameters, final Class<R> returnType) {
     final Function function = new Function(methodName, inputParameters, formatReturnTypes(outputParameters));
-    return callMethod(buildMethodCall(from, to, function, returnType));
+    return callMethod(() -> getFunctionResult(from, to, function, returnType));
   }
 
   private static <T extends Type> List<TypeReference<?>> formatReturnTypes(final List<Class<T>> list) {
     return list.stream().map(TypeReference::create).collect(Collectors.toList());
   }
 
-  private static <R> R callMethod(final RemoteCall<R> remoteCall) {
+  private static <R> R callMethod(final Callable<R> callable) {
     R value;
     try {
-      value = remoteCall.send();
+      value = new RemoteCall<>(callable).send();
     } catch (final Exception e) {
       log.error("", e);
       value = null;
@@ -119,13 +120,8 @@ public class BlockchainServiceImpl implements BlockchainService {
     return value;
   }
 
-  private <R> RemoteCall<R> buildMethodCall(final String from, final String to, final Function function,
+  private <R> R getFunctionResult(final String from, final String to, final Function function,
       final Class<R> returnType) {
-    return new RemoteCall(() -> formatCallResult(from, to, function, returnType));
-  }
-
-  private <R> R formatCallResult(final String from, final String to, final Function function,
-      final Class<R> returnType) throws IOException {
     final Type result = getFirstElement(executeFunction(from, to, function));
     if (result == null) {
       throw new ContractCallException("Empty value (0x) returned from contract");
@@ -144,16 +140,23 @@ public class BlockchainServiceImpl implements BlockchainService {
     return list != null && !list.isEmpty() ? list.get(0) : null;
   }
 
-  private List<Type> executeFunction(final String from, final String to, final Function function) throws IOException {
+  private List<Type> executeFunction(final String from, final String to, final Function function) {
     final String encodedFunction = FunctionEncoder.encode(function);
     final Transaction transaction = Transaction.createEthCallTransaction(from, to, encodedFunction);
     return executeTransaction(transaction, function.getOutputParameters(), DefaultBlockParameterName.LATEST);
   }
 
   private List<Type> executeTransaction(final Transaction transaction, final List<TypeReference<Type>> outputParameters,
-      final DefaultBlockParameter defaultBlockParameter) throws IOException {
+      final DefaultBlockParameter defaultBlockParameter) {
     final Web3j web3j = getWeb3j(false);
-    final EthCall ethCall = web3j.ethCall(transaction, defaultBlockParameter).send();
-    return FunctionReturnDecoder.decode(ethCall.getValue(), outputParameters);
+    String result;
+    try {
+      final EthCall ethCall = web3j.ethCall(transaction, defaultBlockParameter).send();
+      result = ethCall.getValue();
+    } catch (final IOException ioe) {
+      log.error("", ioe);
+      result = null;
+    }
+    return FunctionReturnDecoder.decode(result, outputParameters);
   }
 }
