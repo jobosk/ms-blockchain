@@ -23,6 +23,7 @@ import com.alfatecsistemas.ms.common.Constants;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BlockchainServiceImpl implements BlockchainService {
@@ -111,13 +112,13 @@ public class BlockchainServiceImpl implements BlockchainService {
   }
   */
 
-  public <T extends Type> TypeReference<T> getReturnType(final Class<T> type) {
-    return TypeReference.create(type);
-  }
-
-  public <R> R executeGetMethod(final String from, final String to, final String methodName,
-      final List<Type> inputParameters, final List<TypeReference<?>> outputParameters, final Class<R> returnType) {
-    final Function function = new Function(methodName, inputParameters, outputParameters);
+  public <T extends Type, R> R executeGetMethod(final String from, final String to, final String methodName,
+      final List<Type> inputParameters, final List<Class<T>> outputParameters, final Class<R> returnType) {
+    final Function function = new Function(
+        methodName
+        , inputParameters
+        , outputParameters.stream().map(TypeReference::create).collect(Collectors.toList())
+    );
     return getValue(buildFunctionCall(from, to, function, returnType));
   }
 

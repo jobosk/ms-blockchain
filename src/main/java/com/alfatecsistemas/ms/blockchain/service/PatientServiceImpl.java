@@ -153,7 +153,7 @@ public class PatientServiceImpl implements PatientService {
         , patientAddress
         , "getPatientId"
         , Arrays.asList()
-        , Arrays.asList(blockchainService.getReturnType(Uint256.class))
+        , Arrays.asList(Uint256.class)
         , BigInteger.class
     );
   }
