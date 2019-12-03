@@ -4,22 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.FunctionReturnDecoder;
-import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.RemoteCall;
-import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
-import org.web3j.tx.exceptions.ContractCallException;
 import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Convert;
 
@@ -30,12 +21,9 @@ import com.alfatecsistemas.ms.common.dto.KeyDto;
 import com.alfatecsistemas.ms.common.util.CryptoUtil;
 import com.alfatecsistemas.ms.common.util.EncodingUtil;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.security.PublicKey;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 @Service
 public class PatientServiceImpl implements PatientService {
@@ -160,11 +148,12 @@ public class PatientServiceImpl implements PatientService {
   */
 
   public BigInteger getPatientInfo(final String patientAddress) {
-    return blockchainService.<Uint256, BigInteger>executeGetMethod(
+    return blockchainService.executeGetMethod(
         walletAddress
         , patientAddress
         , "getPatientId"
-        , Collections.emptyList()
+        , Arrays.asList()
+        , Arrays.asList(blockchainService.<Uint256>getReturnType())
         , BigInteger.class
     );
   }

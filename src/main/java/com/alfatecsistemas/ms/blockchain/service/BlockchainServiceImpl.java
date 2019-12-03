@@ -22,6 +22,7 @@ import com.alfatecsistemas.ms.common.Constants;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -112,9 +113,9 @@ public class BlockchainServiceImpl implements BlockchainService {
   }
   */
 
-  public <T extends Type, R> R executeGetMethod(final String from, final String to, final String functionName,
-      final List<Type> inputParameters, final Class<R> returnType) {
-    return this.getValue(this.<T, R>executeFunctionMethod(from, to, functionName, inputParameters, returnType));
+  public <R> R executeGetMethod(final String from, final String to, final String functionName,
+      final List<Type> inputParameters, final List<TypeReference<?>> outputParameters, final Class<R> returnType) {
+    return getValue(executeFunctionMethod(from, to, functionName, inputParameters, outputParameters, returnType));
   }
 
   private static <R> R getValue(final RemoteCall<R> remoteCall) {
@@ -128,17 +129,17 @@ public class BlockchainServiceImpl implements BlockchainService {
     return value;
   }
 
-  private <T extends Type, R> RemoteCall<R> executeFunctionMethod(final String from, final String to,
-      final String methodName, final List<Type> inputParameters, final Class<R> returnType) {
+  private <R> RemoteCall<R> executeFunctionMethod(final String from, final String to, final String methodName,
+      final List<Type> inputParameters, final List<TypeReference<?>> outputParameters, final Class<R> returnType) {
     final Function function = new Function(
         methodName
         , inputParameters
-        , Collections.singletonList(BlockchainServiceImpl.<T>getReturnType())
+        , outputParameters
     );
     return new RemoteCall(() -> executeValidFunction(from, to, function, returnType));
   }
 
-  private static <T extends Type> TypeReference<T> getReturnType() {
+  public <T extends Type> TypeReference<T> getReturnType() {
     return new TypeReference<T>() {
     };
   }
