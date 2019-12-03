@@ -111,9 +111,8 @@ public class BlockchainServiceImpl implements BlockchainService {
   }
   */
 
-  public <T extends Type> TypeReference<T> getReturnType() {
-    return new TypeReference<T>() {
-    };
+  public <T extends Type> TypeReference<T> getReturnType(final Class<T> type) {
+    return TypeReference.create(type);
   }
 
   public <R> R executeGetMethod(final String from, final String to, final String methodName,
