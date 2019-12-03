@@ -102,7 +102,7 @@ public class BlockchainServiceImpl implements BlockchainService {
   public <T extends Type, R> R executeGetMethod(final String from, final String to, final String methodName,
       final List<Type> inputParameters, final List<Class<T>> outputParameters, final Class<R> returnType) {
     final Function function = new Function(methodName, inputParameters, formatReturnTypes(outputParameters));
-    return callMethod(() -> getFunctionResult(from, to, function, returnType));
+    return callMethod(() -> getFunctionResult(executeReturnFunction(from, to, function), returnType));
   }
 
   private static <T extends Type> List<TypeReference<?>> formatReturnTypes(final List<Class<T>> list) {
@@ -120,9 +120,8 @@ public class BlockchainServiceImpl implements BlockchainService {
     return value;
   }
 
-  private <R> R getFunctionResult(final String from, final String to, final Function function,
-      final Class<R> returnType) {
-    final Type result = getFirstElement(executeFunction(from, to, function));
+  private static <R> R getFunctionResult(final List<Type> functionResult, final Class<R> returnType) {
+    final Type result = getFirstElement(functionResult);
     if (result == null) {
       throw new ContractCallException("Empty value (0x) returned from contract");
     }
@@ -140,13 +139,14 @@ public class BlockchainServiceImpl implements BlockchainService {
     return list != null && !list.isEmpty() ? list.get(0) : null;
   }
 
-  private List<Type> executeFunction(final String from, final String to, final Function function) {
+  private List<Type> executeReturnFunction(final String from, final String to, final Function function) {
     final String encodedFunction = FunctionEncoder.encode(function);
     final Transaction transaction = Transaction.createEthCallTransaction(from, to, encodedFunction);
-    return executeTransaction(transaction, function.getOutputParameters(), DefaultBlockParameterName.LATEST);
+    return executeReturnTransaction(transaction, function.getOutputParameters(), DefaultBlockParameterName.LATEST);
   }
 
-  private List<Type> executeTransaction(final Transaction transaction, final List<TypeReference<Type>> outputParameters,
+  private List<Type> executeReturnTransaction(final Transaction transaction,
+      final List<TypeReference<Type>> outputParameters,
       final DefaultBlockParameter defaultBlockParameter) {
     final Web3j web3j = getWeb3j(false);
     String result;
