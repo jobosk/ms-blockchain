@@ -10,6 +10,7 @@ import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.request.Transaction;
@@ -81,10 +82,6 @@ public class BlockchainServiceImpl implements BlockchainService {
   }
 
   /*
-  public String executeRequestTransaction(final String hexValue) {
-    return null;
-  }
-
   public String executeUpdateTransaction(final String hexValue) {
     String result;
     try {
@@ -99,30 +96,19 @@ public class BlockchainServiceImpl implements BlockchainService {
   private String sendAsyncTransaction(final String hexValue) throws IOException {
     return getWeb3j(false).ethSendRawTransaction(hexValue).send().getTransactionHash();
   }
-
-  private static <T> T getValue(final RemoteCall<T> remoteCall) {
-    T value;
-    try {
-      value = remoteCall.send();
-    } catch (final Exception e) {
-      log.error("", e);
-      value = null;
-    }
-    return value;
-  }
   */
 
   public <T extends Type, R> R executeGetMethod(final String from, final String to, final String methodName,
       final List<Type> inputParameters, final List<Class<T>> outputParameters, final Class<R> returnType) {
     final Function function = new Function(methodName, inputParameters, formatReturnTypes(outputParameters));
-    return getValue(buildFunctionCall(from, to, function, returnType));
+    return callMethod(buildMethodCall(from, to, function, returnType));
   }
 
   private static <T extends Type> List<TypeReference<?>> formatReturnTypes(final List<Class<T>> list) {
     return list.stream().map(TypeReference::create).collect(Collectors.toList());
   }
 
-  private static <R> R getValue(final RemoteCall<R> remoteCall) {
+  private static <R> R callMethod(final RemoteCall<R> remoteCall) {
     R value;
     try {
       value = remoteCall.send();
@@ -133,14 +119,14 @@ public class BlockchainServiceImpl implements BlockchainService {
     return value;
   }
 
-  private <R> RemoteCall<R> buildFunctionCall(final String from, final String to, final Function function,
+  private <R> RemoteCall<R> buildMethodCall(final String from, final String to, final Function function,
       final Class<R> returnType) {
-    return new RemoteCall(() -> executeValidFunction(from, to, function, returnType));
+    return new RemoteCall(() -> formatCallResult(from, to, function, returnType));
   }
 
-  private <R> R executeValidFunction(final String from, final String to,
-      final Function function, final Class<R> returnType) throws IOException {
-    final Type result = executeSingleResultFunction(from, to, function);
+  private <R> R formatCallResult(final String from, final String to, final Function function,
+      final Class<R> returnType) throws IOException {
+    final Type result = getFirstElement(executeFunction(from, to, function));
     if (result == null) {
       throw new ContractCallException("Empty value (0x) returned from contract");
     }
@@ -150,22 +136,24 @@ public class BlockchainServiceImpl implements BlockchainService {
     } else if (result.getClass().equals(Address.class) && returnType.equals(String.class)) {
       return (R) result.toString();
     } else {
-      throw new ContractCallException(
-          "Unable to convert response: " + value + " to expected type: " + returnType.getSimpleName());
+      throw new ContractCallException("Cannot convert response: " + value + " to type: " + returnType.getSimpleName());
     }
   }
 
-  private Type executeSingleResultFunction(final String from, final String to, final Function function)
-      throws IOException {
-    final List<Type> values = executeFunction(from, to, function);
-    return !values.isEmpty() ? values.get(0) : null;
+  private static Type getFirstElement(final List<Type> list) {
+    return list != null && !list.isEmpty() ? list.get(0) : null;
   }
 
   private List<Type> executeFunction(final String from, final String to, final Function function) throws IOException {
     final String encodedFunction = FunctionEncoder.encode(function);
-    final Web3j web3j = getWeb3j(false);
     final Transaction transaction = Transaction.createEthCallTransaction(from, to, encodedFunction);
-    final EthCall ethCall = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
-    return FunctionReturnDecoder.decode(ethCall.getValue(), function.getOutputParameters());
+    return executeTransaction(transaction, function.getOutputParameters(), DefaultBlockParameterName.LATEST);
+  }
+
+  private List<Type> executeTransaction(final Transaction transaction, final List<TypeReference<Type>> outputParameters,
+      final DefaultBlockParameter defaultBlockParameter) throws IOException {
+    final Web3j web3j = getWeb3j(false);
+    final EthCall ethCall = web3j.ethCall(transaction, defaultBlockParameter).send();
+    return FunctionReturnDecoder.decode(ethCall.getValue(), outputParameters);
   }
 }
