@@ -146,8 +146,7 @@ public class BlockchainServiceImpl implements BlockchainService {
   }
 
   private List<Type> executeReturnTransaction(final Transaction transaction,
-      final List<TypeReference<Type>> outputParameters,
-      final DefaultBlockParameter defaultBlockParameter) {
+      final List<TypeReference<Type>> outputParameters, final DefaultBlockParameter defaultBlockParameter) {
     final Web3j web3j = getWeb3j(false);
     String result;
     try {
