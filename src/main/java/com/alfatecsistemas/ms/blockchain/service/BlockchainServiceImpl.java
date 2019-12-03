@@ -114,12 +114,12 @@ public class BlockchainServiceImpl implements BlockchainService {
 
   public <T extends Type, R> R executeGetMethod(final String from, final String to, final String methodName,
       final List<Type> inputParameters, final List<Class<T>> outputParameters, final Class<R> returnType) {
-    final Function function = new Function(
-        methodName
-        , inputParameters
-        , outputParameters.stream().map(TypeReference::create).collect(Collectors.toList())
-    );
+    final Function function = new Function(methodName, inputParameters, formatReturnTypes(outputParameters));
     return getValue(buildFunctionCall(from, to, function, returnType));
+  }
+
+  private static <T extends Type> List<TypeReference<?>> formatReturnTypes(final List<Class<T>> list) {
+    return list.stream().map(TypeReference::create).collect(Collectors.toList());
   }
 
   private static <R> R getValue(final RemoteCall<R> remoteCall) {
@@ -164,10 +164,8 @@ public class BlockchainServiceImpl implements BlockchainService {
   private List<Type> executeFunction(final String from, final String to, final Function function) throws IOException {
     final String encodedFunction = FunctionEncoder.encode(function);
     final Web3j web3j = getWeb3j(false);
-    final EthCall ethCall = web3j.ethCall(
-        Transaction.createEthCallTransaction(from, to, encodedFunction)
-        , DefaultBlockParameterName.LATEST
-    ).send();
+    final Transaction transaction = Transaction.createEthCallTransaction(from, to, encodedFunction);
+    final EthCall ethCall = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
     return FunctionReturnDecoder.decode(ethCall.getValue(), function.getOutputParameters());
   }
 }
