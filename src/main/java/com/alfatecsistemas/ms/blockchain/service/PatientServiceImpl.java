@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.ECKeyPair;
@@ -153,7 +154,7 @@ public class PatientServiceImpl implements PatientService {
         , patientAddress
         , "getPatientId"
         , Arrays.asList()
-        , Arrays.asList(blockchainService.<Uint256>getReturnType())
+        , Arrays.asList(new TypeReference<Uint256>() {})
         , BigInteger.class
     );
   }
