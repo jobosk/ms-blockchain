@@ -160,7 +160,7 @@ public class PatientServiceImpl implements PatientService {
   */
 
   public BigInteger getPatientInfo(final String patientAddress) {
-    return blockchainService.executeGetMethod(
+    return blockchainService.<Uint256, BigInteger>executeGetMethod(
         walletAddress
         , patientAddress
         , "getPatientId"

@@ -112,13 +112,13 @@ public class BlockchainServiceImpl implements BlockchainService {
   }
   */
 
-  public <R> R executeGetMethod(final String from, final String to, final String functionName,
+  public <T extends Type, R> R executeGetMethod(final String from, final String to, final String functionName,
       final List<Type> inputParameters, final Class<R> returnType) {
-    return getValue(executeFunctionMethod(from, to, functionName, inputParameters, returnType));
+    return this.getValue(this.<T, R>executeFunctionMethod(from, to, functionName, inputParameters, returnType));
   }
 
-  private static <T extends Type> T getValue(final RemoteCall<T> remoteCall) {
-    T value;
+  private static <R> R getValue(final RemoteCall<R> remoteCall) {
+    R value;
     try {
       value = remoteCall.send();
     } catch (final Exception e) {
@@ -128,7 +128,7 @@ public class BlockchainServiceImpl implements BlockchainService {
     return value;
   }
 
-  private <T extends Type, R> RemoteCall<T> executeFunctionMethod(final String from, final String to,
+  private <T extends Type, R> RemoteCall<R> executeFunctionMethod(final String from, final String to,
       final String methodName, final List<Type> inputParameters, final Class<R> returnType) {
     final Function function = new Function(
         methodName

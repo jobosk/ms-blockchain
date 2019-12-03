@@ -13,6 +13,6 @@ public interface BlockchainService {
 
   //String executeRequestTransaction(String hexValue) throws IOException;
 
-  <R> R executeGetMethod(final String from, final String to, final String functionName,
+  <T extends Type, R> R executeGetMethod(final String from, final String to, final String functionName,
       final List<Type> inputParameters, final Class<R> returnType);
 }
